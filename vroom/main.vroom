@@ -1,0 +1,55 @@
+Install dependencies:
+
+  :set nocompatible
+  :let g:repo = fnamemodify($VROOMFILE, ':p:h:h')
+  :execute 'source' g:repo . '/bootstrap.vim'
+
+
+codefmtlib is a very simple library that allows registering formatters and
+getting the list of registered formatters.
+
+Formatters are registered with codefmtlib#AddFormatter. Each formatter must be a
+dict that has certain fields defined, as described in the codefmtlib docs.
+
+  :let formatter1 = {'name': 'formatter1'}
+  :function formatter1.IsAvailable()<CR>
+  |  return 1<CR>
+  |endfunction
+  :function formatter1.AppliesToBuffer()<CR>
+  |  return 1<CR>
+  |endfunction
+  :function formatter1.Format()<CR>
+  |endfunction
+  :call codefmtlib#AddFormatter(formatter1)
+
+If it isn't, ERROR(WrongType) or ERROR(BadValue) will be thrown.
+
+  :let add = maktaba#function#Create('codefmtlib#AddFormatter')
+  :call maktaba#error#Try(add.WithArgs(0))
+  ~ ERROR(WrongType): Expected a dictionary. Got a number.
+
+  :call maktaba#error#Try(add.WithArgs({}))
+  ~ ERROR(BadValue): a:formatter is missing fields: name, IsAvailable,
+  | AppliesToBuffer
+
+If it doesn't have the right format functions, ERROR(BadValue) will be thrown.
+
+  :let formatter = deepcopy(formatter1)
+  :unlet formatter.Format
+  :let add = maktaba#function#Create('codefmtlib#AddFormatter')
+  :call maktaba#error#Try(add.WithArgs(formatter))
+  ~ ERROR(BadValue): Formatter formatter1 has no format functions.  It must have
+  | at least one of Format, FormatRange, FormatRanges
+
+codefmtlib#GetFormatters gets a list with a copy of each registered formatter.
+
+  :let formatters = map(codefmtlib#GetFormatters(), 'v:val.name')
+  :call maktaba#ensure#IsEqual(formatters, ["formatter1"])
+
+codefmtlib#AddDefaultFormatter installs formatters with a lower priority.
+
+  :let formatter2 = deepcopy(formatter1)
+  :let formatter2.name = 'formatter2'
+  :call codefmtlib#AddDefaultFormatter(formatter2)
+  :let formatters = map(codefmtlib#GetFormatters(), 'v:val.name')
+  :call maktaba#ensure#IsEqual(formatters, ["formatter1", "formatter2"])

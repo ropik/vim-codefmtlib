@@ -1,0 +1,61 @@
+*codefmtlib.txt*	Syntax-aware code formatting
+                                                                  *codefmtlib*
+
+==============================================================================
+CONTENTS                                                 *codefmtlib-contents*
+  1. Introduction...........................................|codefmtlib-intro|
+  2. Dictionaries...........................................|codefmtlib-dicts|
+  3. Functions..........................................|codefmtlib-functions|
+
+==============================================================================
+INTRODUCTION                                                *codefmtlib-intro*
+
+This library is the interface between the |codefmt| plugin and other plugins
+that register formatters for codefmt. It offers no useful functionality by
+itself.
+
+==============================================================================
+DICTIONARIES                                                *codefmtlib-dicts*
+
+                                                        *codefmtlib.Formatter*
+Interface for applying formatting to lines of code. Defines these fields:
+  * name (string): The formatter name that will be exposed to users.
+  * setup_instructions (string, optional): A string explaining to users how to
+    make the plugin available if not already available.
+and these functions:
+  * IsAvailable() -> boolean: Whether the formatter is fully functional with
+    all dependencies available. Returns 0 only if setup_instructions have not
+    been followed.
+  * AppliesToBuffer() -> boolean: Whether the current buffer is of a type
+    normally formatted by this formatter. Normally based on 'filetype', but
+    could depend on buffer name or other properties.
+and should implement at least one of the following functions:
+  * Format(): Formats the current buffer directly.
+  * FormatRange({startline}, {endline}): Formats the current buffer, focusing
+    on the range of lines from {startline} to {endline}.
+  * FormatRanges({ranges}): Formats the current buffer, focusing on the given
+    ranges of lines. Each range should be a 2-item list of
+    [startline,endline].
+Formatters should implement the most specific format method that is supported.
+
+==============================================================================
+FUNCTIONS                                               *codefmtlib-functions*
+
+codefmtlib#AddFormatter({formatter})               *codefmtlib#AddFormatter()*
+  Registers {formatter} as a supported formatter. See |codefmtlib.Formatter|
+  for the API {formatter} must implement.
+  Throws ERROR(WrongType) if {formatter} is not a dict.
+  Throws ERROR(BadValue) if {formatter} is missing required fields.
+
+codefmtlib#AddDefaultFormatter({formatter}) *codefmtlib#AddDefaultFormatter()*
+  Registers {formatter} as a default formatter. Default formatters are serve
+  as fallbacks if no customer formatter has been registered. See
+  |codefmtlib.Formatter| for the API {formatter} must implement.
+  Throws ERROR(WrongType) if {formatter} is not a dict.
+  Throws ERROR(BadValue) if {formatter} is missing required fields.
+
+codefmtlib#GetFormatters()                        *codefmtlib#GetFormatters()*
+  Returns a list of all registered formatters in order of their priority.
+
+
+vim:tw=78:ts=8:ft=help:norl:
