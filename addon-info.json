@@ -4,7 +4,6 @@
   "author": "Google",
   "repository": {"type": "git", "url": "git://github.com/google/vim-codefmtlib"},
   "dependencies": {
-    "maktaba": {"type": "git", "url": "git://github.com/google/vim-maktaba"},
-    "codefmt": {"type": "git", "url": "git://github.com/google/vim-codefmt"}
+    "maktaba": {"type": "git", "url": "git://github.com/google/vim-maktaba"}
   }
 }
